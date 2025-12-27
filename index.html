@@ -585,7 +585,7 @@ window.onclick = function(event) {
         
         <button onclick="closeAntGame()" style="position:absolute; top:10px; right:10px; background:#ff4d6d; color:white; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-weight:bold; font-size:20px; line-height:30px; display:flex; justify-content:center; align-items:center;">&times;</button>
         
-        <iframe id="antFrame" src="https://1682004tien-code.github.io/images-/knm0.html" width="100%" height="500px" style="border:none; display:block;"></iframe>
+        <iframe id="antFrame" src="" width="100%" height="500px" style="border:none; display:block;"></iframe>
     </div>
 </div>
 
@@ -594,19 +594,19 @@ function showAntGame() {
     const modal = document.getElementById('antGameModal');
     const iframe = document.getElementById('antFrame');
     
-    // ĐÃ SỬA: Thay đổi link tại đây để khớp với GitHub của bạn
-    const gameUrl = "https://1682004tien-code.github.io/images-/knm0.html";
-    iframe.src = gameUrl + "?v=" + new Date().getTime(); 
+    // Đã sửa: Dùng đúng link trò chơi diệt kiến của bạn
+    iframe.src = "https://1682004tien-code.github.io/images-/2341.html"; 
     
     modal.style.display = 'flex';
 }
 
 function closeAntGame() {
     document.getElementById('antGameModal').style.display = 'none';
-    // Dừng game khi đóng modal để không bị tiếng ồn hoặc tốn RAM
+    // Xóa src khi đóng để dừng nhạc/game chạy ngầm
     document.getElementById('antFrame').src = "";
 }
 
+// Đóng khi bấm ra ngoài vùng đen
 window.onclick = function(event) {
     const modal = document.getElementById('antGameModal');
     if (event.target == modal) {
