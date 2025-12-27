@@ -577,15 +577,15 @@ window.onclick = function(event) {
     }
 }
 </script>
-<div id="antGameModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
-    <div style="background:white; width:95%; max-width:500px; border-radius:20px; position:relative; overflow:hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 4px solid #4CAF50;">
+<div id="antGameModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
+    <div style="background:white; width:95%; max-width:500px; border-radius:20px; position:relative; overflow:hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
         <div style="background:#4CAF50; color:white; padding:15px; text-align:center; font-weight:bold; font-size:18px;">
             Trận chiến kiến bảo vệ Gấm iu 🐜
         </div>
         
-        <button onclick="closeAntGame()" style="position:absolute; top:10px; right:10px; background:#ff4d6d; color:white; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-weight:bold; font-size:20px; display:flex; justify-content:center; align-items:center;">&times;</button>
+        <button onclick="closeAntGame()" style="position:absolute; top:10px; right:10px; background:#ff4d6d; color:white; border:none; width:30px; height:30px; border-radius:50%; cursor:pointer; font-weight:bold; font-size:20px; line-height:30px; display:flex; justify-content:center; align-items:center;">&times;</button>
         
-        <iframe id="antFrame" width="100%" height="500px" style="border:none; display:block;"></iframe>
+        <iframe id="antFrame" src="https://1682004tien-code.github.io/images-/knm0.html" width="100%" height="500px" style="border:none; display:block;"></iframe>
     </div>
 </div>
 
@@ -594,21 +594,19 @@ function showAntGame() {
     const modal = document.getElementById('antGameModal');
     const iframe = document.getElementById('antFrame');
     
-    // Link Githack dẫn đến file kkkkkk.html mới nhất của bạn
-    const gameUrl = "https://raw.githack.com/1682004tien-code/images-/main/kkkkkk.html";
-    
+    // ĐÃ SỬA: Thay đổi link tại đây để khớp với GitHub của bạn
+    const gameUrl = "https://1682004tien-code.github.io/images-/knm0.html";
     iframe.src = gameUrl + "?v=" + new Date().getTime(); 
+    
     modal.style.display = 'flex';
 }
 
 function closeAntGame() {
-    const modal = document.getElementById('antGameModal');
-    const iframe = document.getElementById('antFrame');
-    modal.style.display = 'none';
-    iframe.src = ""; // Dừng game và nhạc khi đóng
+    document.getElementById('antGameModal').style.display = 'none';
+    // Dừng game khi đóng modal để không bị tiếng ồn hoặc tốn RAM
+    document.getElementById('antFrame').src = "";
 }
 
-// Đóng khi click vào vùng tối bên ngoài
 window.onclick = function(event) {
     const modal = document.getElementById('antGameModal');
     if (event.target == modal) {
