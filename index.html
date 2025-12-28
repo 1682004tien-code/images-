@@ -96,6 +96,47 @@
         #res-popup { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 8000; align-items: center; justify-content: center; padding: 20px; }
         .res-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 90%; max-width: 380px; border: 4px solid var(--machine-border); box-shadow: 0 15px 40px rgba(0,0,0,0.4); animation: fadeIn 0.4s; }
         #res-img { width: 100%; border-radius: 15px; margin: 15px 0; border: 3px solid var(--pink-bg); display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+/* Bảng popup đếm ngược - Căn giữa tuyệt đối */
+.modal-countdown {
+    display: none; 
+    position: fixed; 
+    z-index: 10000; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    /* Căn giữa */
+    justify-content: center; 
+    align-items: center; 
+}
+
+/* Nội dung bảng */
+.modal-content-countdown {
+    background: #fffafa; 
+    padding: 20px; 
+    width: 85%;
+    max-width: 320px;
+    max-height: 80vh; /* Không cao quá 80% màn hình */
+    overflow-y: auto; /* Tự hiện thanh cuộn khi cần */
+    border-radius: 20px; 
+    text-align: center;
+    position: relative;
+    border: 2px solid #ffb6c1;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+}
+.event-row {
+    background: #fff;
+    margin: 12px 0;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.event-row p { margin: 0; font-size: 0.85rem; color: #888; margin-bottom: 4px; }
+.event-row b { color: #ff4d6d; font-size: 1.1rem; font-family: 'Courier New', Courier, monospace; }
+.close-modal { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #ff4d6d; }
     </style>
 </head>
 <body>
@@ -117,6 +158,7 @@
     <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <a href="#" onclick="showPage('home')">🏠 Trang chủ</a>
+        <a href="javascript:void(0)" onclick="showCountdown()">⏳ Đếm ngược sự kiện</a>
         <a href="#" onclick="showPage('music-page')">🎵 Nhạc của chúng mình</a>
         <a href="#" onclick="showPage('gallery-page')">📸 Kho ảnh kỷ niệm</a>
         <a href="#" onclick="showPage('letter-page')">💌 Thư gửi Gấm iu</a>
@@ -510,6 +552,60 @@
         function startApp() {
             initPlaylist(); updateTimer(); setInterval(updateTimer, 1000); loadSong(0);
         }
+// 1. Tạo giao diện bảng đếm ngược
+if (!document.getElementById('countdownModal')) {
+    document.body.insertAdjacentHTML('beforeend', `
+        <div id="countdownModal" class="modal-countdown">
+            <div class="modal-content-countdown">
+                <span class="close-modal" onclick="closeCountdown()">&times;</span>
+                <h3 style="color:#ff4d6d; margin: 10px 0; font-family: sans-serif;">⏳ Đếm ngược sự kiện</h3>
+                
+                <div class="event-row"><p>🎂 Sinh nhật Gấm iu (08/06)</p><b id="gam-t"></b></div>
+                <div class="event-row"><p>🍰 Sinh nhật Tiến iu (16/08)</p><b id="tien-t"></b></div>
+                <div class="event-row"><p>❤️ Valentine Đỏ (14/02)</p><b id="val-t"></b></div>
+                <div class="event-row"><p>🤍 Valentine Trắng (14/03)</p><b id="white-val-t"></b></div>
+                <div class="event-row"><p>🎄 Giáng sinh (24/12)</p><b id="noel-t"></b></div>
+                <div class="event-row"><p>🌸 Quốc tế Phụ nữ (08/03)</p><b id="women-intl-t"></b></div>
+                <div class="event-row"><p>🎀 Phụ nữ Việt Nam (20/10)</p><b id="women-vn-t"></b></div>
+            </div>
+        </div>
+    `);
+}
+// 2. Hàm mở bảng - Dùng 'flex' để kích hoạt căn giữa của CSS
+function showCountdown() {
+    document.getElementById("countdownModal").style.display = "flex";
+    if (typeof closeSidebar === "function") closeSidebar(); 
+}
+
+// 3. Hàm đóng bảng
+function closeCountdown() {
+    document.getElementById("countdownModal").style.display = "none";
+}
+
+// 4. Máy tính thời gian
+function startCounting() {
+    function diff(m, d) {
+        let now = new Date();
+        let t = new Date(now.getFullYear(), m - 1, d);
+        if (now > t) t.setFullYear(now.getFullYear() + 1);
+        let remain = t - now;
+        let day = Math.floor(remain / 86400000);
+        let hr = Math.floor((remain % 86400000) / 3600000);
+        let min = Math.floor((remain % 3600000) / 60000);
+        let sec = Math.floor((remain % 60000) / 1000);
+        return day + "d " + hr.toString().padStart(2,'0') + ":" + min.toString().padStart(2,'0') + ":" + sec.toString().padStart(2,'0');
+    }
+    
+    if(document.getElementById('gam-t')) {
+        document.getElementById('gam-t').innerText = diff(6, 8);
+        document.getElementById('tien-t').innerText = diff(8, 16);
+        document.getElementById('val-t').innerText = diff(2, 14);
+        document.getElementById('white-val-t').innerText = diff(3, 14);
+        document.getElementById('noel-t').innerText = diff(12, 24);
+        document.getElementById('women-intl-t').innerText = diff(3, 8);
+        document.getElementById('women-vn-t').innerText = diff(10, 20);
+    }
+}setInterval(startCounting, 1000);
     </script>
 <div id="gachaModal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter: blur(8px); justify-content: center; align-items: center;">
     <div style="position:relative; width:90%; max-width:420px; height:85vh; background:#fff; border-radius:30px; overflow:hidden; border: 5px solid #ffb6c1; box-shadow: 0 0 30px rgba(255,192,203,0.6);">
