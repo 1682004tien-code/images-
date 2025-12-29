@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Nhà Trọ Cho Mẹ</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; --bg: #f0f2f5; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; touch-action: manipulation; }
+        
+        .tab-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 10px; background: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .tab-btn { border: none; padding: 15px 5px; border-radius: 8px; font-weight: bold; font-size: 14px; background: #e4e6eb; color: #65676b; }
+        .tab-btn.active { background: var(--accent); color: white; }
+
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .window { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 18px; }
+        
+        .table-scroll { overflow-x: auto; margin-top: 10px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid #eee; text-align: center; }
+        
+        .num-input { width: 100px; padding: 12px 5px; text-align: center; border: 2px solid #3498db; border-radius: 8px; font-size: 18px; font-weight: bold; }
+        .old-val { background: #f8f9fa; border: none; width: 60px; color: #7f8c8d; }
+
+        #editModal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
+        .modal-content { background: white; width: 90%; max-width: 400px; margin: 50px auto; padding: 20px; border-radius: 15px; }
+
+        .btn { border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        .btn-save { background: var(--accent); color: white; }
+        .btn-chot { background: var(--success); color: white; padding: 8px 12px; font-size: 14px; width: auto; }
+        .total-money { color: var(--danger); font-weight: bold; font-size: 17px; }
+        .room-card { border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        .room-card p { margin: 5px 0; font-size: 15px; color: #444; }
+
+        /* Thêm style cho modal mật khẩu */
+        #passwordModal { display: block; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .password-content { background: white; width: 90%; max-width: 300px; margin: 100px auto; padding: 20px; border-radius: 15px; text-align: center; }
+        .password-title { font-size: 18px; margin-bottom: 20px; color: var(--primary); }
+        .number-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .number-btn { padding: 20px; font-size: 24px; font-weight: bold; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; }
+        .number-btn:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+
+<!-- Modal mật khẩu -->
+<div id="passwordModal">
+    <div class="password-content">
+        <h2 class="password-title">Quản lí trọ - tác giả: Trần Duy Tiến</h2>
+        <div class="number-grid">
+            <button class="number-btn" onclick="enterNumber(1)">1</button>
+            <button class="number-btn" onclick="enterNumber(2)">2</button>
+            <button class="number-btn" onclick="enterNumber(3)">3</button>
+            <button class="number-btn" onclick="enterNumber(4)">4</button>
+            <button class="number-btn" onclick="enterNumber(5)">5</button>
+            <button class="number-btn" onclick="enterNumber(6)">6</button>
+            <button class="number-btn" onclick="enterNumber(7)">7</button>
+            <button class="number-btn" onclick="enterNumber(8)">8</button>
+            <button class="number-btn" onclick="enterNumber(9)">9</button>
+            <button class="number-btn" onclick="enterNumber(0)">0</button>
+        </div>
+    </div>
+</div>
+
+<div class="tab-menu">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-config')">1. Cài đặt</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-billing')">2. Tính tiền</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-rooms')">3. Thông tin</button>
+</div>
+
+<div class="container">
+    <div id="tab-config" class="content-section active">
+        <div class="window">
+            <h2>Cài đặt giá chung (VNĐ)</h2>
+            <div class="form-group"><label>Giá điện</label><input type="text" id="g-dien" inputmode="numeric" onfocus="unformatMoneyInput(this)" onblur="formatMoneyInput(this)"></div>
+            <div class="form-group"><label>Giá nước</label><input type="text" id="g-nuoc" inputmode="numeric" onfocus="unformatMoneyInput(this)" onblur="formatMoneyInput(this)"></div>
+            <div class="form-group"><label>Phí khác (Rác, Net...)</label><input type="text" id="g-dv" inputmode="numeric" onfocus="unformatMoneyInput(this)" onblur="formatMoneyInput(this)"></div>
+            <button class="btn btn-save" onclick="saveConfig()">LƯU CÀI ĐẶT</button>
+        </div>
+    </div>
+
+    <div id="tab-billing" class="content-section">
+        <div class="window">
+            <h2>Nhập số điện nước mới</h2>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr><th>Phòng</th><th>Điện (Cũ-Mới)</th><th>Nước (Cũ-Mới)</th><th>Tổng tiền</th><th>Lệnh</th></tr>
+                    </thead>
+                    <tbody id="billing-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-rooms" class="content-section">
+        <div class="window">
+            <div id="room-info-grid"></div>
+        </div>
+    </div>
+</div>
+
+<div id="editModal">
+    <div class="modal-content">
+        <h3>Sửa thông tin phòng</h3>
+        <input type="hidden" id="edit-id">
+        <div class="form-group"><label>Tên phòng:</label><input type="text" id="edit-ten"></div>
+        <div class="form-group"><label>Số điện thoại:</label><input type="tel" id="edit-sdt" placeholder="090..."></div>
+        <div class="form-group"><label>Tiền cọc:</label><input type="text" id="edit-coc" inputmode="numeric" onfocus="unformatMoneyInput(this)" onblur="formatMoneyInput(this)"></div>
+        <div class="form-group"><label>Giá thuê:</label><input type="text" id="edit-gia" inputmode="numeric" onfocus="unformatMoneyInput(this)" onblur="formatMoneyInput(this)"></div>
+        <div class="form-group"><label>Ngày đóng:</label><input type="text" id="edit-ngay"></div>
+        <button class="btn btn-save" onclick="submitEdit()">LƯU THAY ĐỔI</button>
+        <button class="btn" style="background:#ccc" onclick="closeModal()">Hủy</button>
+    </div>
+</div>
+
+<script>
+    // --- HÀM ĐÃ SỬA LỖI NHẬP TIỀN ---
+    function formatMoneyInput(el) {
+        // Lấy giá trị thô (chỉ lấy số)
+        let val = el.value.replace(/\D/g, ""); 
+        
+        if (val === "") {
+            el.value = "";
+            return;
+        }
+
+        // Chuyển thành số và định dạng vi-VN (. phân cách hàng nghìn)
+        let formatted = parseInt(val).toLocaleString('vi-VN').replace(/,/g, ".");
+        
+        // Gán lại giá trị đã định dạng vào ô input
+        el.value = formatted;
+    }
+
+    function unformatMoneyInput(el) {
+        // Loại bỏ dấu chấm để nhập số thô
+        el.value = el.value.replace(/\./g, "");
+    }
+
+    function toMoney(num) { return (num || 0).toLocaleString('vi-VN').replace(/,/g, "."); }
+    function parseMoney(str) { 
+        if (!str) return 0;
+        return parseInt(str.toString().replace(/\./g, "")) || 0; 
+    }
+
+    let rooms = JSON.parse(localStorage.getItem('room_data')) || Array.from({length: 13}, (_, i) => ({
+        id: i + 1, ten: `Phòng ${101 + i}`, giaThue: 2500000, ngayTT: '05', sdt: '', tienCoc: 0, dienCu: 0, dienMoi: 0, nuocCu: 0, nuocMoi: 0
+    }));
+    let config = JSON.parse(localStorage.getItem('room_config')) || { dien: 3500, nuoc: 15000, dv: 150000 };
+
+    // Biến cho mật khẩu
+    let enteredPassword = '';
+
+    function enterNumber(num) {
+        enteredPassword += num.toString();
+        if (enteredPassword === '1984') {
+            document.getElementById('passwordModal').style.display = 'none';
+        } else if (enteredPassword.length >= 4) {
+            alert('Mật khẩu sai! Vui lòng thử lại.');
+            enteredPassword = '';
+        }
+    }
+
+    function openTab(evt, tabName) {
+        document.querySelectorAll(".content-section").forEach(c => c.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+        renderAll();
+    }
+
+    function saveConfig() {
+        config.dien = parseMoney(document.getElementById('g-dien').value);
+        config.nuoc = parseMoney(document.getElementById('g-nuoc').value);
+        config.dv = parseMoney(document.getElementById('g-dv').value);
+        localStorage.setItem('room_config', JSON.stringify(config));
+        alert("Đã lưu cài đặt giá!");
+    }
+
+    function updateNum(id, field, val, el) {
+        let room = rooms.find(r => r.id === id);
+        room[field] = parseInt(val) || 0;
+        let tDien = Math.max(0, (room.dienMoi - room.dienCu)) * config.dien;
+        let tNuoc = Math.max(0, (room.nuocMoi - room.nuocCu)) * config.nuoc;
+        let tong = room.giaThue + tDien + tNuoc + config.dv;
+        el.closest('tr').querySelector('.total-money').innerText = toMoney(tong);
+        localStorage.setItem('room_data', JSON.stringify(rooms));
+    }
+
+    function renderAll() {
+        const body = document.getElementById('billing-body');
+        body.innerHTML = '';
+        rooms.forEach(r => {
+            let tong = r.giaThue + Math.max(0, (r.dienMoi-r.dienCu))*config.dien + Math.max(0, (r.nuocMoi-r.nuocCu))*config.nuoc + config.dv;
+            body.innerHTML += `
+                <tr>
+                    <td><b>${r.ten}</b></td>
+                    <td><div class="num-group">
+                        <input class="num-input old-val" value="${r.dienCu}" readonly>
+                        <input type="number" class="num-input" value="${r.dienMoi||''}" oninput="updateNum(${r.id}, 'dienMoi', this.value, this)">
+                    </div></td>
+                    <td><div class="num-group">
+                        <input class="num-input old-val" value="${r.nuocCu}" readonly>
+                        <input type="number" class="num-input" value="${r.nuocMoi||''}" oninput="updateNum(${r.id}, 'nuocMoi', this.value, this)">
+                    </div></td>
+                    <td class="total-money">${toMoney(tong)}</td>
+                    <td><button class="btn btn-chot" onclick="chotSo(${r.id})">Chốt</button></td>
+                </tr>`;
+        });
+
+        const grid = document.getElementById('room-info-grid');
+        grid.innerHTML = '<h2>Danh sách 13 phòng</h2>';
+        rooms.forEach(r => {
+            grid.innerHTML += `
+                <div class="room-card">
+                    <h3 style="margin-top:0; color:var(--primary)">${r.ten}</h3>
+                    <p><b>SĐT:</b> ${r.sdt || 'Chưa có'}</p>
+                    <p><b>Tiền cọc:</b> <span style="color:var(--success)">${toMoney(r.tienCoc)}đ</span></p>
+                    <p><b>Giá thuê:</b> ${toMoney(r.giaThue)}đ/tháng</p>
+                    <p><b>Ngày đóng tiền:</b> Ngày ${r.ngayTT} hàng tháng</p>
+                    <button class="btn btn-save" style="padding:10px; margin-top:10px" onclick="openEdit(${r.id})">SỬA THÔNG TIN</button>
+                </div>`;
+        });
+    }
+
+    function chotSo(id) {
+        let r = rooms.find(room => room.id === id);
+        if (confirm(`Chốt số điện nước cho ${r.ten}? Số mới sẽ thành số cũ.`)) {
+            r.dienCu = r.dienMoi || r.dienCu;
+            r.nuocCu = r.nuocMoi || r.nuocCu;
+            r.dienMoi = 0; r.nuocMoi = 0;
+            localStorage.setItem('room_data', JSON.stringify(rooms));
+            renderAll();
+        }
+    }
+
+    function openEdit(id) {
+        let r = rooms.find(room => room.id === id);
+        document.getElementById('edit-id').value = r.id;
+        document.getElementById('edit-ten').value = r.ten;
+        document.getElementById('edit-sdt').value = r.sdt || '';
+        document.getElementById('edit-coc').value = toMoney(r.tienCoc);
+        document.getElementById('edit-gia').value = toMoney(r.giaThue);
+        document.getElementById('edit-ngay').value = r.ngayTT;
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    function submitEdit() {
+        let id = parseInt(document.getElementById('edit-id').value);
+        let r = rooms.find(room => room.id === id);
+        
+        r.ten = document.getElementById('edit-ten').value;
+        r.sdt = document.getElementById('edit-sdt').value;
+        r.tienCoc = parseMoney(document.getElementById('edit-coc').value);
+        r.giaThue = parseMoney(document.getElementById('edit-gia').value);
+        r.ngayTT = document.getElementById('edit-ngay').value;
+        
+        localStorage.setItem('room_data', JSON.stringify(rooms));
+        renderAll();
+        closeModal();
+    }
+
+    document.getElementById('g-dien').value = toMoney(config.dien);
+    document.getElementById('g-nuoc').value = toMoney(config.nuoc);
+    document.getElementById('g-dv').value = toMoney(config.dv);
+    renderAll();
+</script>
+</body>
+</html>
